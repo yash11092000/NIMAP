@@ -1,0 +1,210 @@
+--add table in database
+
+
+
+CREATE TABLE [dbo].[Products](
+	[ProductId] [int] IDENTITY(1,1) NOT NULL,
+	[ProductName] [varchar](500) NULL,
+	[CategoryId] [int] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ProductId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Products]  WITH CHECK ADD FOREIGN KEY([CategoryId])
+REFERENCES [dbo].[Category] ([CategoryId])
+GO
+
+
+
+
+
+CREATE TABLE [dbo].[Category](
+	[CategoryId] [int] IDENTITY(1,1) NOT NULL,
+	[CategoryName] [varchar](500) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[CategoryId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+
+
+
+--
+CREATE Proc AddCategory    
+@NewCategoryId int,  
+@CategoryName varchar(100)    
+as    
+    
+begin    
+  if(@NewCategoryId = 0)  
+  begin  
+   insert into Category(CategoryName)    
+   values(@CategoryName)    
+  end   
+  
+  else  
+  begin  
+ update Category  
+ set CategoryName = @CategoryName  
+ where CategoryId = @NewCategoryId  
+  
+  end   
+end   
+
+
+--add product
+
+Create Proc AddProduct  
+@ProductId int,  
+@ProductName varchar(500),  
+@CategoryId int  
+as  
+  
+begin  
+   
+ if(@ProductId = 0)  
+ begin  
+  insert into Products(ProductName,CategoryId)  
+  values(@ProductName,@CategoryId)  
+ end  
+ else  
+ begin  
+  update Products  
+  set ProductName = @ProductName,  
+  CategoryId = @CategoryId  
+  where ProductId = @ProductId  
+  
+ end  
+  
+end 
+
+
+--get all products
+Create Proc AddProduct  
+@ProductId int,  
+@ProductName varchar(500),  
+@CategoryId int  
+as  
+  
+begin  
+   
+ if(@ProductId = 0)  
+ begin  
+  insert into Products(ProductName,CategoryId)  
+  values(@ProductName,@CategoryId)  
+ end  
+ else  
+ begin  
+  update Products  
+  set ProductName = @ProductName,  
+  CategoryId = @CategoryId  
+  where ProductId = @ProductId  
+  
+ end  
+  
+end 
+
+
+--GetCategoryDropDown
+CREATE proc GetCategoryDropDown    
+as    
+    
+begin    
+    
+  
+ select '' as value ,'select Option' as Text  
+ union all  
+ select Cast(CategoryId as varchar(30)) as Value,CategoryName as Text from Category    
+    
+end 
+
+--DeleteProducts
+
+Create proc DeleteProducts  
+@ProductId int  
+as  
+  
+begin  
+  
+  
+ delete from Products  
+ where ProductId = @ProductId  
+  
+end 
+
+--GetProductDetails
+
+Create Proc GetProductDetails  
+@ProductId int  
+as  
+  
+begin  
+   
+ select Products.ProductId,Products.ProductName,Products.CategoryId   
+ from Products    
+ where Products.ProductId = @ProductId   
+  
+end   
+
+
+
+--GetCategoryList
+
+Create Proc GetCategoryList  
+  
+as  
+  
+begin  
+   
+ select CategoryId,CategoryName from Category  
+  
+end 
+
+
+--EditCategory
+
+Create Proc EditCategory  
+@CategoryId int  
+as  
+  
+begin  
+  
+ select CategoryId,CategoryName from Category  
+ where CategoryId = @CategoryId  
+  
+end 
+
+
+
+--DeleteCategory
+Create Proc DeleteCategory  
+@CategoryId int  
+as  
+  
+begin  
+  
+ delete from Category  
+ where CategoryId = @CategoryId  
+  
+end 
+
+
+
+--
+
+Alter Proc CheckCategoryUsed
+@CategoryId int
+as
+
+begin
+
+
+	select count(1)Cnt from Products 
+	where CategoryId = @CategoryId
+
+end 
