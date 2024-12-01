@@ -1,0 +1,452 @@
+﻿@model Product
+@{
+    ViewData["Title"] = "Products";
+}
+<style>
+    .dnone {
+        display: none;
+    }
+
+    .req {
+        color: red;
+    }
+
+    .form-label {
+        font-weight: 500 !important;
+    }
+
+    .Icon {
+        cursor: pointer;
+    }
+
+</style>
+
+<input type="text" id="TotalRecords" value="" hidden />
+
+<div class="row">
+    <div class="col-md-12 d-flex justify-content-end">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Add Category
+        </button>
+
+    </div>
+</div>
+<div id="" class="container">
+    <form id="ProductDiv">
+        <input type="text" id="ProductId" name="ProductId" hidden />
+        <div class="mb-3">
+            <label for="ProductName" class="form-label">Product Name<span class="req">*</span></label>
+            <input type="text" class="form-control" name="ProductName" id="ProductName" placeholder="Enter Product Name">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Category<span class="req">*</span></label>
+            <select id="CategoryId" class="form-select" name="CategoryId">
+                <option value="1">Select Option</option>
+            </select>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="AddProduct">Add Product</button>
+    </form>
+</div>
+
+
+<div class="mt-5">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ProductId</th>
+                <th>ProductName</th>
+                <th>CategoryId</th>
+                <th>CategoryName</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody id="ProductListDiv"></tbody>
+        <tfoot>
+            <tr>
+                <td colspan="6">
+                    <div style="display:flex;justify-content:space-between">
+                        <div>
+
+                            page: <span id="page">1</span>
+                        </div>
+                        <div class="">
+                            <select class="form-select" onchange="ChangePageSize()" id="pageSizeSelector">
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                            </select>
+                            <a onclick="prevPage()" class="mx-1" href="javascript:void()" id="btn_prev">Prev</a>
+                            <a onclick="nextPage()" class="mx-1" href="javascript:void()" id="btn_next">Next</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+        </tfoot>
+    </table>
+</div>
+
+
+<div class="modal fade bd-example-modal-lg" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Category</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input type="text" id="NewCategoryId" name="NewCategoryId" value="" hidden />
+                            <label class="form-label">Category <span class="req">*</span></label>
+                            <input type="text" class="form-control" name="CategoryName" id="CategoryName" value="" />
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid mt-4">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>CategoryId</th>
+                                <th>CategoryName</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                            </tr>
+
+                        </thead>
+                        <tbody id="CateogryListDiv">
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="AddCategory()">Add/Update Category</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    <script>
+        var current_page = 1;
+        var pageSize = 5;
+
+
+        $(document).ready(function () {
+            GetProductList();
+            GetDropDownData();
+            GetCategoryList();
+            if (current_page == 1) {
+                btn_prev.style.visibility = "hidden";
+            } else {
+                btn_prev.style.visibility = "visible";
+            }
+        });
+
+        function GetProductList() {
+            console.log(current_page);
+            console.log(pageSize);
+            $.ajax({
+                url: '/Home/GeAllProducts',
+                method: 'GET',
+                dataType: 'json',
+                data: { current_page: current_page, pageSize: pageSize },
+                success: function (response) {
+                    //console.log(response);
+                    $("#ProductListDiv").html(response.data);
+
+                    $("#TotalRecords").val(response.totalRecords)
+
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+
+        function GetDropDownData() {
+            $.ajax({
+                url: '/Home/GetCategoryDropDown',
+                method: 'GET',
+                dataType: 'json',
+                data: {},
+                success: function (data) {
+                    $('#CategoryId').empty();
+                    //console.log(data);
+                    $.each(data, function (index, item) {
+                        // console.log(item.value);
+                        // console.log(item.text);
+
+                        $('#CategoryId').append($('<option>', { value: item.value }).text(item.text));
+                    });
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        $("#AddProduct").on("click", function () {
+            $.ajax({
+                url: '/Home/AddProduct',
+                type: 'POST',
+                data: $("#ProductDiv").serialize(),
+                success: function (response) {
+
+                    if ($("#ProductId").val() == 0) {
+                        alert('Product saved successfully!');
+                    }
+                    else {
+                        alert('Product Updated successfully!');
+
+                    }
+                    GetProductList();
+                    ClearData();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error saving product:', error);
+
+                    alert('Failed to save product!');
+                }
+            });
+        })
+
+        function AddCategory() {
+            $.ajax({
+                url: '/Home/AddCategory',
+                type: 'POST',
+                data: { NewCategoryId: $("#NewCategoryId").val(), CategoryName: $("#CategoryName").val() },
+                success: function (response) {
+                    if ($("#NewCategoryId").val() == 0) {
+                        alert('Category  saved successfully!');
+                    }
+                    else {
+                        alert('Category Updated successfully!');
+
+                    }
+
+                    GetCategoryList();
+                    GetDropDownData();
+                    $("#CategoryName").val("")
+                    $("#NewCategoryId").val("")
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error saving product:', error);
+
+                    alert('Failed to save product!');
+                }
+            });
+        }
+
+
+
+        function DeleteProduct(ProductId) {
+            $.ajax({
+                url: '/Home/DeleteProducts',
+                method: 'Delete',
+                dataType: 'json',
+                data: { ProductId: ProductId },
+                success: function (data) {
+                    if (data) {
+                        GetProductList();
+                    }
+
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        function DeleteCategory(CategoryId) {
+            $.ajax({
+                url: '/Home/DeleteCategory',
+                method: 'Delete',
+                dataType: 'json',
+                data: { CategoryId: CategoryId },
+                success: function (data) {
+                    if (data) {
+                        GetCategoryList();
+                    }
+
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+
+        function CheckIsUsed(CategoryId) {
+            $.ajax({
+                url: '/Home/CheckCategoryUsed',
+                method: 'Get',
+                dataType: 'json',
+                data: { CategoryId: CategoryId },
+                success: function (data) {
+                    if (!data) {
+                        DeleteCategory(CategoryId);
+                    }
+                    else{
+                        alert("Category Used")
+                    }
+
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        function EditProduct(ProductId) {
+            $.ajax({
+                url: '/Home/GetProductDetails',
+                method: 'GET',
+                dataType: 'json',
+                data: { ProductId: ProductId },
+                success: function (data) {
+                    console.log(data);
+                    $("#ProductId").val(data.productId);
+                    $("#ProductName").val(data.productName);
+                    $("#CategoryId").val(data.categoryId);
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        function ClearData() {
+            $("#ProductDiv").trigger("reset")
+        }
+        //categoryList
+
+        function GetCategoryList() {
+            $.ajax({
+                url: '/Home/GetCategoryList',
+                method: 'GET',
+                dataType: 'json',
+                data: {},
+                success: function (data) {
+                    //console.log(data);
+                    $("#CateogryListDiv").html(data);
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        function EditCategory(CategoryId) {
+            $.ajax({
+                url: '/Home/EditCategory',
+                method: 'GET',
+                dataType: 'json',
+                data: { CategoryId: CategoryId },
+                success: function (data) {
+                    //console.log(data);
+                    $("#NewCategoryId").val(data.categoryId);
+                    $("#CategoryName").val(data.categoryName);
+
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+        
+       
+
+        //pagination Code
+
+        function prevPage() {
+            console.log("prev", current_page)
+            if (current_page > 1) {
+                current_page--;
+                changePage(current_page);
+            }
+            else {
+                alert("No Record")
+            }
+
+        }
+
+        function nextPage() {
+            console.log("Next", current_page, numPages())
+            if (current_page < numPages()) {
+                current_page++;
+                changePage(current_page);
+            }
+            else {
+                alert("No Record")
+            }
+        }
+
+
+        function numPages() {
+
+            var TotalRecords = parseInt($("#TotalRecords").val(), 10) || 0;
+            return Math.ceil(TotalRecords / pageSize);
+        }
+
+
+        function changePage(page) {
+            //console.log(page)
+            var btn_next = document.getElementById("btn_next");
+            var btn_prev = document.getElementById("btn_prev");
+            var page_span = document.getElementById("page");
+            var TotalRecords = parseInt($("#TotalRecords").val(), 10) || 0;
+
+
+            if (page < 1) page = 1;
+            if (page > numPages()) page = numPages();
+
+
+
+            GetProductList()
+
+            page_span.innerHTML = `Showing ${current_page} out of ${Math.ceil(TotalRecords / pageSize)} records`;
+
+
+            if (page == 1) {
+                btn_prev.style.visibility = "hidden";
+            } else {
+                btn_prev.style.visibility = "visible";
+            }
+
+            if (page == numPages()) {
+                btn_next.style.visibility = "hidden";
+            } else {
+                btn_next.style.visibility = "visible";
+            }
+
+        }
+
+
+
+
+        function ChangePageSize() {
+            pageSize = $("#pageSizeSelector").val();
+            changePage(1);
+        }
+    </script>
+}

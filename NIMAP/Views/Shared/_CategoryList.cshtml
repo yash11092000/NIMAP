@@ -1,0 +1,24 @@
+﻿@model System.Data.DataSet
+
+@if (Model.Tables[0].Rows.Count > 0)
+{
+    for (int i = 0; i < Model.Tables[0].Rows.Count; i++)
+    {
+        <tr>
+            <td>@Model.Tables[0].Rows[i]["CategoryId"]</td>
+            <td>@Model.Tables[0].Rows[i]["CategoryName"]</td>
+            <td width="5%" class="text-center font-bold text-primary Icon" onclick="EditCategory('@Model.Tables[0].Rows[i]["CategoryId"]')"> &#9998;</td>
+            <td width="5%" class="text-center font-bold text-danger Icon" onclick="CheckIsUsed('@Model.Tables[0].Rows[i]["CategoryId"]')">&#215;</td>
+        </tr>
+
+    }
+}
+else
+{
+    <tr>
+        <td colspan="4" class="text-center">No Record Found</td>
+    </tr>
+
+}
+
+
