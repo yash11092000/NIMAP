@@ -201,55 +201,71 @@
         }
 
         $("#AddProduct").on("click", function () {
-            $.ajax({
-                url: '/Home/AddProduct',
-                type: 'POST',
-                data: $("#ProductDiv").serialize(),
-                success: function (response) {
+            var ProductName = $("#ProductName");
+            if (ProductName.val() == "") {
+                alert("Enter Product Name")
+                ProductName.focus();
+            }
+            else {
+                $.ajax({
+                    url: '/Home/AddProduct',
+                    type: 'POST',
+                    data: $("#ProductDiv").serialize(),
+                    success: function (response) {
 
-                    if ($("#ProductId").val() == 0) {
-                        alert('Product saved successfully!');
+                        if ($("#ProductId").val() == 0) {
+                            alert('Product saved successfully!');
+                        }
+                        else {
+                            alert('Product Updated successfully!');
+
+                        }
+                        GetProductList();
+                        ClearData();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error saving product:', error);
+
+                        alert('Failed to save product!');
                     }
-                    else {
-                        alert('Product Updated successfully!');
-
-                    }
-                    GetProductList();
-                    ClearData();
-                },
-                error: function (xhr, status, error) {
-                    console.error('Error saving product:', error);
-
-                    alert('Failed to save product!');
-                }
-            });
+                });
+            }
         })
 
         function AddCategory() {
-            $.ajax({
-                url: '/Home/AddCategory',
-                type: 'POST',
-                data: { NewCategoryId: $("#NewCategoryId").val(), CategoryName: $("#CategoryName").val() },
-                success: function (response) {
-                    if ($("#NewCategoryId").val() == 0) {
-                        alert('Category  saved successfully!');
+            var CategoryName = $("#CategoryName");
+
+            if (CategoryName.val() == "") {
+                alert("Please Enter CategoryName")
+                CategoryName.focus();
+            }
+            else {
+
+                $.ajax({
+                    url: '/Home/AddCategory',
+                    type: 'POST',
+                    data: { NewCategoryId: $("#NewCategoryId").val(), CategoryName: $("#CategoryName").val() },
+                    success: function (response) {
+                        if ($("#NewCategoryId").val() == 0) {
+                            alert('Category  saved successfully!');
+                        }
+                        else {
+                            alert('Category Updated successfully!');
+
+                        }
+
+                        GetCategoryList();
+                        GetDropDownData();
+                        $("#CategoryName").val("")
+                        $("#NewCategoryId").val("")
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error saving product:', error);
+
+                        alert('Failed to save product!');
                     }
-                    else {
-                        alert('Category Updated successfully!');
-
-                    }
-
-                    GetCategoryList();
-                    GetDropDownData();
-                    $("#CategoryName").val("")
-                    $("#NewCategoryId").val("")
-                },
-                error: function (xhr, status, error) {
-                    console.error('Error saving product:', error);
-
-                    alert('Failed to save product!');
-                }
-            });
+                });
+            }
         }
 
 
@@ -303,7 +319,7 @@
                     if (!data) {
                         DeleteCategory(CategoryId);
                     }
-                    else{
+                    else {
                         alert("Category Used")
                     }
 
@@ -373,8 +389,8 @@
                 }
             });
         }
-        
-       
+
+
 
         //pagination Code
 
